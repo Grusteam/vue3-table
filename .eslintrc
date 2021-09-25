@@ -1,0 +1,24 @@
+{
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended",
+      "@vue/prettier"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {
+      "no-unused-vars": 1,
+      "no-unreachable": 1,
+      "no-useless-escape": 1,
+      "no-empty": 1,
+      "prettier/prettier": ["warn", { "singleQuote": true, "trailingComma": "es5" }],
+      "no-empty-pattern": 1,
+      "vue/no-unused-components": 1
+    },
+    "globals": {}
+}
