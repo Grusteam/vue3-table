@@ -1,7 +1,7 @@
-import { datatype, name, date } from 'faker';
+import { name, date } from 'faker';
 
-const getUser = () => {
-  const id = datatype.uuid();
+const getUser = (_, index) => {
+  const id = `${index}`;
   const firstName = name.firstName();
   const lastName = name.lastName();
   const birthDate = date.past().toString();
