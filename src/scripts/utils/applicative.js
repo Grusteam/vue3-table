@@ -1,3 +1,5 @@
+import { filterProperties } from '../constants/business/table';
+
 const sortByName = (a, b) => {
   const result = a?.fullName > b?.fullName ? 1 : -1;
 
@@ -55,6 +57,38 @@ const humanizeDate = (str) => {
   return result;
 };
 
+const decodeCombinedQueryParameterString = (str) => {
+  const { keyValSeparator } = filterProperties;
+  const reg = new RegExp(
+    `(?<key>[A-Za-z0-9]*)${keyValSeparator}(?<val>[A-Za-z0-9]*)`,
+    'igs'
+  );
+  const result = {};
+
+  let parse;
+  while ((parse = reg.exec(str)) !== null) {
+    const { groups } = parse || {};
+    const { key, val } = groups || {};
+
+    result[key] = val;
+  }
+
+  return result;
+};
+
+const encodeCombinedQueryParameterString = (filter) => {
+  const { keyValSeparator } = filterProperties;
+  let result = '';
+  const arr = Object.entries(filter);
+
+  arr.forEach(([key, val], i) => {
+    const last = i + 1 === arr?.length;
+    result += `${key}${keyValSeparator}${val}${last ? '' : '|'}`;
+  });
+
+  return result;
+};
+
 export {
   sortByName,
   sortByDate,
@@ -62,4 +96,6 @@ export {
   countPaginationParams,
   setLeadingNumbers,
   humanizeDate,
+  decodeCombinedQueryParameterString,
+  encodeCombinedQueryParameterString,
 };
