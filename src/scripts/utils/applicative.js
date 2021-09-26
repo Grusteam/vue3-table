@@ -60,7 +60,7 @@ const humanizeDate = (str) => {
 const decodeCombinedQueryParameterString = (str) => {
   const { keyValSeparator } = filterProperties;
   const reg = new RegExp(
-    `(?<key>[A-Za-z0-9]*)${keyValSeparator}(?<val>[A-Za-z0-9]*)`,
+    `(?<key>[A-Za-z]*)${keyValSeparator}(?<val>[A-Za-z0-9,]*)`,
     'igs'
   );
   const result = {};
@@ -89,6 +89,23 @@ const encodeCombinedQueryParameterString = (filter) => {
   return result;
 };
 
+const removeFromArray = (arr = [], element = {}) => {
+  /* creates a new array */
+  const filtered = arr.filter((el) => el !== element);
+
+  return filtered;
+};
+
+const toggleInArray = (arr, element = {}) => {
+  if (!arr) return arr;
+
+  const inArray = arr.some((el) => el === element);
+
+  if (inArray) return removeFromArray(arr, element);
+
+  return [...arr, element];
+};
+
 export {
   sortByName,
   sortByDate,
@@ -98,4 +115,5 @@ export {
   humanizeDate,
   decodeCombinedQueryParameterString,
   encodeCombinedQueryParameterString,
+  toggleInArray,
 };
