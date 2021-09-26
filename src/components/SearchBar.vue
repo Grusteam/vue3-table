@@ -1,21 +1,44 @@
 <template>
-  <div class="">
-    <div class="" v-for="{ id, name } in searchFields" :key="id">
-      <div class="title">
-        {{ name }}
-      </div>
-      <input
-        class="input"
-        type="text"
-        :value="modelValue[id]"
-        @input="atInput(id, $event.target.value)"
-      />
-    </div>
+  <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th v-for="{ id, name } in searchFields" :key="id">
+            {{ name }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td v-for="{ id } in searchFields" :key="id">
+            <input
+              class="input"
+              type="text"
+              :value="modelValue[id]"
+              @input="atInput(id, $event.target.value)"
+              @keydown.enter.exact="search"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!--  -->
+    <button
+      v-for="{ id, action, name } in searchActions"
+      :key="id"
+      @click="run(action, id)"
+    >
+      {{ name }}
+    </button>
   </div>
 </template>
 
 <script>
-import { searchFields } from '../scripts/constants/business/table';
+import {
+  searchFields,
+  searchActions,
+} from '../scripts/constants/business/table';
 
 export default {
   name: 'SearchBar',
@@ -26,7 +49,11 @@ export default {
     },
   },
   data() {
-    const result = {};
+    const { modelValue } = this;
+
+    const result = {
+      localValue: modelValue,
+    };
 
     return result;
   },
@@ -34,6 +61,7 @@ export default {
   beforeCreate() {},
   created() {
     this.searchFields = searchFields;
+    this.searchActions = searchActions;
   },
   methods: {
     atInput(key, value) {
@@ -43,12 +71,33 @@ export default {
         [key]: value,
       };
 
-      this.$emit('update:modelValue', result);
+      this.localValue = result;
 
       return result;
+    },
+    search() {
+      const { localValue } = this;
+
+      this.$emit('update:modelValue', localValue);
+    },
+    reset() {
+      this.localValue = {};
+      this.$emit('update:modelValue', this.localValue);
+    },
+    run(method, params) {
+      this[method]?.(params);
     },
   },
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.table {
+  max-width: 500px;
+
+  th,
+  tr {
+    min-width: 200px;
+  }
+}
+</style>
