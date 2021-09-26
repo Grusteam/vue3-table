@@ -1,19 +1,13 @@
-const userModelFields = [
-  { id: 'id' },
-  { id: 'fullName' },
-  { id: 'birthDateHumanized' },
-];
+const userModelFields = [{ id: 'id' }, { id: 'fullName' }, { id: 'birthDate' }];
 
 const tableFields = [
   { id: 'fullName', name: 'Full Name' },
-  { id: 'birthDateHumanized', name: 'Birth Date' },
+  { id: 'birthDate', name: 'Birth Date' },
 ];
 
 const searchFields = [
   { id: 'fullName', name: 'Full Name' },
-  { id: 'birthDateHumanized', name: 'Birth Date' },
+  { id: 'birthDate', name: 'Birth Date' },
 ];
 
-const pageSize = 10;
-
-export { userModelFields, tableFields, searchFields, pageSize };
+export { userModelFields, tableFields, searchFields };

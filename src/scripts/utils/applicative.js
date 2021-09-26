@@ -1,10 +1,10 @@
 const sortByName = (a, b) => {
-  const result = a?.fullName > b?.fullName ? -1 : 1;
+  const result = a?.fullName > b?.fullName ? 1 : -1;
 
   return result;
 };
 const sortByDate = (a, b) => {
-  const result = a?.birthDateHumanized > b?.birthDateHumanized ? -1 : 1;
+  const result = a?.birthDate > b?.birthDate ? 1 : -1;
 
   return result;
 };
@@ -12,10 +12,10 @@ const sortByDate = (a, b) => {
 const sortByField = (a, b, id) => {
   const translator = {
     fullName: sortByName,
-    birthDateHumanized: sortByDate,
+    birthDate: sortByDate,
   };
 
-  return translator[id](a, b);
+  return translator[id]?.(a, b);
 };
 
 const countPaginationParams = (target, size, total) => {
@@ -32,4 +32,34 @@ const countPaginationParams = (target, size, total) => {
   return { start, end };
 };
 
-export { sortByName, sortByDate, sortByField, countPaginationParams };
+const setLeadingNumbers = (num = 0, length = 2) => {
+  let result = '';
+
+  for (let i = 0; i < length; i += 1) {
+    result += 0;
+  }
+
+  result += `${num}`;
+  result = result.slice(-length);
+
+  return result;
+};
+
+const humanizeDate = (str) => {
+  const date = new Date(str);
+  const mm = setLeadingNumbers(date.getMonth() + 1);
+  const dd = setLeadingNumbers(date.getDate());
+  const yyyy = date.getFullYear();
+  const result = `${yyyy} ${mm} ${dd}`;
+
+  return result;
+};
+
+export {
+  sortByName,
+  sortByDate,
+  sortByField,
+  countPaginationParams,
+  setLeadingNumbers,
+  humanizeDate,
+};

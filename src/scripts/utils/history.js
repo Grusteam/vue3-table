@@ -1,7 +1,5 @@
 const update = (name, value) => {
-  const params = value
-    ? this.setQueryParam(name, value)
-    : this.deleteQueryParam(name);
+  const params = value ? setQueryParam(name, value) : deleteQueryParam(name);
   /* const isParams = Array.from(params)?.length; */
 
   const query = decodeURIComponent(`?${params.toString()}`);
@@ -10,7 +8,7 @@ const update = (name, value) => {
 };
 
 const getQueryParam = (param) => {
-  const params = this.getQueryParams();
+  const params = getQueryParams();
   const result = params.get(param);
 
   /* TODO: if multiple values of same param */
@@ -20,7 +18,7 @@ const getQueryParam = (param) => {
 };
 
 const getAllParams = () => {
-  const params = this.getQueryParams();
+  const params = getQueryParams();
   const result = {};
 
   Array.from(params.entries()).forEach(([key, val]) => {
@@ -31,7 +29,7 @@ const getAllParams = () => {
 };
 
 const getMultipleParams = (arr) => {
-  const params = this.getQueryParams();
+  const params = getQueryParams();
 
   /* TODO: all */
   /* params.forEach(([val, key])); */
@@ -53,7 +51,7 @@ const getQueryParams = () => {
 };
 
 const setQueryParam = (name, value) => {
-  const params = this.getQueryParams();
+  const params = getQueryParams();
 
   params.set(name, value);
 
@@ -61,7 +59,7 @@ const setQueryParam = (name, value) => {
 };
 
 const deleteQueryParam = (name) => {
-  const params = this.getQueryParams();
+  const params = getQueryParams();
 
   params.delete(name);
 
@@ -69,7 +67,7 @@ const deleteQueryParam = (name) => {
 };
 
 const getUrlWithUpdatedQueryParam = (name, value) => {
-  const newQuery = this.setQueryParam(name, value);
+  const newQuery = setQueryParam(name, value);
   const queryString = newQuery.toString();
   const { origin, pathname } = window.location;
   const result = `${origin}${pathname}?${queryString}`;
@@ -87,7 +85,7 @@ const getPath = (params) => {
   return result;
 };
 
-export {
+export default {
   update,
   getQueryParam,
   getAllParams,
