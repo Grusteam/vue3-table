@@ -1,20 +1,31 @@
 <template>
   <div class="users">
     <header>Oboz forever</header>
+
+    <!-- table -->
     <UsersTable
       :items="usersOutput"
       :sorting="sortingParams"
       @sort="(id) => (sortingField = id)"
     />
-    <!--  -->
-    <SearchBar />
-    <!--  -->
+
+    <!-- search panel with text inputs -->
+    <SearchBar v-model="filter" />
+
+    <!-- page selector -->
     <Pagination
       v-model="page"
       :items="sortedUsers?.length"
-      :page-size="pageSize"
+      :page-size="perPage"
     />
-    <button @click="users = generateNewUsers()">Generate new users</button>
+
+    <!-- optional -->
+    <div class="devtools">
+      <div class="devtools__title">Dev Tools</div>
+
+      <button @click="users = generateNewUsers()">Generate new users</button>
+    </div>
+
     <footer>No doubt</footer>
   </div>
 </template>
@@ -27,6 +38,8 @@ import { getUsers } from '../scripts/utils/faker';
 import {
   countPaginationParams,
   sortByField,
+  decodeCombinedQueryParameterString,
+  encodeCombinedQueryParameterString,
 } from '../scripts/utils/applicative';
 import history from '../scripts/utils/history';
 import { tableFields } from '../scripts/constants/business/table';
@@ -39,24 +52,28 @@ export default {
     SearchBar,
   },
   data() {
-    const { page, pageSize, sortingField } = this.getQueryParams();
+    const { page, perPage, sortingField, filter } = this.getQueryParams();
     const users = this.getUsers();
-
-    this.pageSize = pageSize;
 
     const result = {
       users,
       /*  */
       page,
+      perPage,
+      /*  */
       sortingField,
       sortingDirection: false,
+      filter,
     };
 
     return result;
   },
   watch: {
-    page(val) {
-      history.update('page', val);
+    tableParams(params) {
+      this.setcombinedQueryParam(params);
+    },
+    filter(filter) {
+      this.setcombinedQueryParam(filter);
     },
   },
   computed: {
@@ -67,25 +84,35 @@ export default {
       return result;
     },
     totalPages() {
-      const { sortedUsers, pageSize } = this;
-      const result = Math.ceil(sortedUsers?.length / pageSize);
+      const { sortedUsers, perPage } = this;
+      const result = Math.ceil(sortedUsers?.length / perPage);
 
       return result;
     },
     /* 1 filtering */
     filteredUsers() {
-      const { users } = this;
+      const { users, filter } = this;
+      let result = [...users];
 
-      const filter = () => true;
+      Object.entries(filter).forEach(([key, val]) => {
+        const filter = (user) => {
+          if (!user[key] || !val) return true;
 
-      const result = users.filter(filter);
+          const area = user[key].toLowerCase?.();
+          const target = val.toLowerCase?.();
+
+          return area?.includes(target);
+        };
+
+        result = result.filter(filter);
+      });
 
       return result;
     },
     /* 2 sorting */
     sortedUsers() {
-      const { users, sortingField } = this;
-      const result = [...users];
+      const { filteredUsers, sortingField } = this;
+      const result = [...filteredUsers];
 
       const sort = (a, b) => sortByField(a, b, sortingField);
 
@@ -96,25 +123,39 @@ export default {
     },
     /* 3 pagination */
     usersOutput() {
-      const { sortedUsers, page, pageSize } = this;
+      const { sortedUsers, page, perPage } = this;
+
       const { start, end } = countPaginationParams(
         page,
-        pageSize,
+        perPage,
         sortedUsers.length
       );
       const result = sortedUsers.slice(start, end);
 
       return result;
     },
+    /* query */
+    tableParams() {
+      const { page, perPage } = this;
+      const result = {
+        page,
+        perPage,
+      };
+
+      return result;
+    },
   },
   beforeCreate() {
-    /* plwase pre-set users number */
-    this.usersCount = 100;
+    /* please pre-set users number */
+    this.usersCount = 1000;
   },
   created() {
     const queryParams = history.getAllParams();
 
     this.queryParams = queryParams;
+  },
+  mounted() {
+    window.onpopstate = this.watchHistoryState;
   },
   methods: {
     getUsers() {
@@ -148,29 +189,54 @@ export default {
       return result;
     },
     getQueryParams() {
+      /* real query params */
       const queryParams = history.getAllParams();
       const {
-        page: queryPage,
-        sort,
-        perPage /* selection, filter */,
+        tableParams,
+        filter,
+        /* selection,  */
       } = queryParams;
+
+      /* certain params from combined string */
+      const filterSetup = decodeCombinedQueryParameterString(filter);
+      const tableSetup = decodeCombinedQueryParameterString(tableParams);
+      const { page: queryPage, sort, perPage } = tableSetup || {};
+
+      /* data interpretation */
       const page = +queryPage > 0 ? +queryPage : 1;
       const pageSize = +perPage > 0 ? +perPage : 10;
       const sortingField =
         tableFields.find(({ id }) => id === sort)?.id || null;
 
-      const result = { page, pageSize, sortingField };
-
-      // console.log('input', queryParams);
-      // console.log('output', result);
+      /* output */
+      const result = {
+        page,
+        perPage: pageSize,
+        sortingField,
+        filter: filterSetup,
+      };
 
       return result;
+    },
+    applyQueryParams() {
+      const setup = this.getQueryParams();
+
+      Object.entries(setup).forEach(([key, val]) => {
+        console.log('key, val', key, val);
+        this[key] = val;
+      });
+    },
+    watchHistoryState(e) {
+      console.log('e', e);
+      this.applyQueryParams();
+    },
+    setcombinedQueryParam(params) {
+      const newQueryParam = encodeCombinedQueryParameterString(params);
+
+      history.update('tableParams', newQueryParam);
     },
   },
 };
 </script>
 
 <style scoped lang="scss"></style>
-
-/* tableParams=sort:-fullName page:1 perPage=5 selection=id1,id2
-filter=fullName:Vladis birthDate:12.12.2012 */
