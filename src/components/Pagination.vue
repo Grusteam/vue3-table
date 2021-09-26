@@ -6,7 +6,7 @@
       :key="id"
       @click="$emit('update:modelValue', id)"
     >
-      {{ id }} &nbsp;
+      {{ id }}
     </div>
   </div>
 </template>
@@ -28,11 +28,6 @@ export default {
       default: 10,
     },
   },
-  data() {
-    const result = {};
-
-    return result;
-  },
   computed: {
     totalPages() {
       const { items, pageSize } = this;
@@ -49,9 +44,6 @@ export default {
       return result;
     },
   },
-  beforeCreate() {},
-  created() {},
-  methods: {},
 };
 </script>
 
@@ -60,6 +52,7 @@ export default {
   &__item {
     display: inline-block;
     cursor: pointer;
+    margin: 0 4px;
 
     &.active {
       background-color: #ff0;

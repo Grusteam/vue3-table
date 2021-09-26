@@ -1,4 +1,5 @@
-import { filterProperties } from '../constants/business/table';
+import { filterProperties, tableFields } from '../constants/business/table';
+import history from './history';
 
 const sortByName = (a, b) => {
   const result = a?.fullName > b?.fullName ? 1 : -1;
@@ -6,7 +7,11 @@ const sortByName = (a, b) => {
   return result;
 };
 const sortByDate = (a, b) => {
-  const result = a?.birthDate > b?.birthDate ? 1 : -1;
+  const aDate = new Date(a?.birthDate);
+  const bDate = new Date(b?.birthDate);
+  const aTimestamp = aDate.getTime();
+  const bTimestamp = bDate.getTime();
+  const result = aTimestamp > bTimestamp ? 1 : -1;
 
   return result;
 };
@@ -106,6 +111,47 @@ const toggleInArray = (arr, element = {}) => {
   return [...arr, element];
 };
 
+const userDataFilter = (user, key, val) => {
+  if (!user[key] || !val) return true;
+
+  const area = user[key].toLowerCase?.();
+  const target = val.toLowerCase?.();
+
+  return area?.includes(target);
+};
+
+const getQueryParams = () => {
+  /* real query params */
+  const queryParams = history.getAllParams();
+  const { tableParams, filter } = queryParams;
+
+  /* certain params from combined string */
+  console.log('tableParams', tableParams);
+  console.log('filter', filter);
+  const filterSetup = decodeCombinedQueryParameterString(filter);
+  const tableSetup = decodeCombinedQueryParameterString(tableParams);
+  const { page: queryPage, sort, perPage, selection } = tableSetup || {};
+
+  /* data interpretation */
+  const page = +queryPage > 0 ? +queryPage : 1;
+  const pageSize = +perPage > 0 ? +perPage : 10;
+  const sortingField = tableFields.find(({ id }) => id === sort)?.id || null;
+
+  const selected = selection?.split(',');
+  const selectedItems = (selected || []).map((str) => str.substring(2));
+
+  /* output */
+  const result = {
+    page,
+    perPage: pageSize,
+    sortingField,
+    filter: filterSetup,
+    selectedItems,
+  };
+
+  return result;
+};
+
 export {
   sortByName,
   sortByDate,
@@ -116,4 +162,6 @@ export {
   decodeCombinedQueryParameterString,
   encodeCombinedQueryParameterString,
   toggleInArray,
+  userDataFilter,
+  getQueryParams,
 };

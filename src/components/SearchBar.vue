@@ -4,6 +4,7 @@
       <table>
         <thead>
           <tr>
+            <!-- map titles -->
             <th v-for="{ id, name } in searchFields" :key="id">
               {{ name }}
             </th>
@@ -11,6 +12,7 @@
         </thead>
         <tbody>
           <tr>
+            <!-- map inputs -->
             <td v-for="{ id } in searchFields" :key="id">
               <input
                 class="input"
@@ -54,6 +56,8 @@ export default {
   },
   data() {
     const { modelValue } = this;
+
+    console.log('modelValue', modelValue);
 
     const result = {
       localValue: modelValue,
