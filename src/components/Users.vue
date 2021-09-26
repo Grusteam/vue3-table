@@ -255,4 +255,8 @@ export default {
   position: fixed;
   bottom: 0;
 }
+
+footer {
+  margin-top: 100px;
+}
 </style>

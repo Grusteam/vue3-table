@@ -1,13 +1,13 @@
 <template>
   <div class="pagination">
-    <span
+    <div
       :class="{ pagination__item: true, active: modelValue === id }"
       v-for="{ id } in pages"
       :key="id"
       @click="$emit('update:modelValue', id)"
     >
       {{ id }} &nbsp;
-    </span>
+    </div>
   </div>
 </template>
 
@@ -58,6 +58,9 @@ export default {
 <style scoped lang="scss">
 .pagination {
   &__item {
+    display: inline-block;
+    cursor: pointer;
+
     &.active {
       background-color: #ff0;
     }

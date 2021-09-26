@@ -1,36 +1,40 @@
 <template>
-  <div class="table">
-    <table>
-      <thead>
-        <tr>
-          <th v-for="{ id, name } in searchFields" :key="id">
-            {{ name }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td v-for="{ id } in searchFields" :key="id">
-            <input
-              class="input"
-              type="text"
-              :value="modelValue[id]"
-              @input="atInput(id, $event.target.value)"
-              @keydown.enter.exact="search"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="root">
+    <div class="table">
+      <table>
+        <thead>
+          <tr>
+            <th v-for="{ id, name } in searchFields" :key="id">
+              {{ name }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td v-for="{ id } in searchFields" :key="id">
+              <input
+                class="input"
+                type="text"
+                :value="modelValue[id]"
+                @input="atInput(id, $event.target.value)"
+                @keydown.enter.exact="search"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!--  -->
-    <button
-      v-for="{ id, action, name } in searchActions"
-      :key="id"
-      @click="run(action, id)"
-    >
-      {{ name }}
-    </button>
+    <div class="actions">
+      <button
+        v-for="{ id, action, name } in searchActions"
+        :key="id"
+        @click="run(action, id)"
+      >
+        {{ name }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -93,11 +97,16 @@ export default {
 
 <style scoped lang="scss">
 .table {
-  max-width: 500px;
+  width: 500px;
 
   th,
   tr {
     min-width: 200px;
   }
+}
+
+.actions {
+  display: flex;
+  margin-left: 150px;
 }
 </style>

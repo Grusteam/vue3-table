@@ -93,9 +93,22 @@ export default {
     background-color: #ff0;
   }
 }
-.row {
-  &.active {
-    background-color: #0f0;
+
+.table {
+  th,
+  tr {
+    min-width: 200px;
+  }
+
+  .column {
+    cursor: pointer;
+  }
+  .row {
+    cursor: pointer;
+
+    &.active {
+      background-color: #0f0;
+    }
   }
 }
 </style>
