@@ -34,10 +34,16 @@ const filterProperties = {
   pairsSeparator: '|',
 };
 
+const searchActions = [
+  { id: 'search', action: 'search', name: 'Искать' },
+  { id: 'reset', action: 'reset', name: 'Сброс' },
+];
+
 export {
   userModelFields,
   tableFields,
   searchFields,
   filterProperties,
   queryParams,
+  searchActions,
 };
