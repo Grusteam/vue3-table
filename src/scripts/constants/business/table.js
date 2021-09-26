@@ -10,4 +10,15 @@ const searchFields = [
   { id: 'birthDate', name: 'Birth Date' },
 ];
 
-export { userModelFields, tableFields, searchFields };
+const queryParams = [
+  { id: 'fullName', name: 'Full Name' },
+  { id: 'birthDate', name: 'Birth Date' },
+  { id: 'perPage', name: 'Per Page' },
+];
+
+const filterProperties = {
+  keyValSeparator: ':',
+  pairsSeparator: '|',
+};
+
+export { userModelFields, tableFields, searchFields, filterProperties };
