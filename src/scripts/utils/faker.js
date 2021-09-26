@@ -4,7 +4,7 @@ const getUser = () => {
   const id = datatype.uuid();
   const firstName = name.firstName();
   const lastName = name.lastName();
-  const birthDate = date.past();
+  const birthDate = date.past().toString();
   const fullName = `${firstName} ${lastName}`;
   const result = {
     id,
