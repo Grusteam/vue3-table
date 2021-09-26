@@ -18,14 +18,18 @@ const sortByField = (a, b, id) => {
   return translator[id](a, b);
 };
 
-const countPaginationParams = (target, size) => {
+const countPaginationParams = (target, size, total) => {
+  /* pge < 0 */
+  if (!(target > 0)) return { start: 0, end: size };
+  /* pge > max */
+  if (total && target * size > total) {
+    return { start: total - size, end: total };
+  }
+
   const start = target === 1 ? 0 : target * size - size;
   const end = target === 1 ? size : target * size;
 
-  return {
-    start,
-    end,
-  };
+  return { start, end };
 };
 
 export { sortByName, sortByDate, sortByField, countPaginationParams };
