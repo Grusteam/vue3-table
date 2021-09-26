@@ -84,6 +84,9 @@ export default {
     filter(value) {
       this.setcombinedQueryParam('filter', value);
     },
+    sortingField() {
+      this.sortingReversed = false;
+    },
   },
   computed: {
     /* 1 filtering */
