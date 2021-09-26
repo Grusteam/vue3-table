@@ -1,6 +1,13 @@
 <template>
   <div class="table">
-    <table>
+    <!-- fallback -->
+    <div v-if="!items?.length">
+      <div>Sorry, no users found</div>
+      <div>Pleace try to change you request parameters</div>
+    </div>
+
+    <!--  -->
+    <table v-else>
       <thead>
         <tr>
           <!-- column name -->
