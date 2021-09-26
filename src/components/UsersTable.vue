@@ -8,7 +8,8 @@
             v-for="{ id, name } in tableFields"
             :key="id"
             :class="{
-              'is-active': sorting?.field === id,
+              column: true,
+              active: sorting?.field === id,
               asc: sorting?.direction,
             }"
             @click="$emit('sort', id)"
@@ -22,7 +23,7 @@
         <tr v-for="user in items" :key="user.id">
           <!-- value -->
           <td v-for="{ id } in tableFields" :key="id">
-            {{ user[id] }}
+            {{ id === 'birthDate' ? humanizeDate(user[id]) : user[id] }}
           </td>
         </tr>
       </tbody>
@@ -32,6 +33,7 @@
 
 <script>
 import { tableFields } from '../scripts/constants/business/table';
+import { humanizeDate } from '../scripts/utils/applicative';
 
 export default {
   name: 'UsersTable',
@@ -53,11 +55,16 @@ export default {
   computed: {},
   created() {
     this.tableFields = tableFields;
-
-    console.log('this.items', this.items);
+    this.humanizeDate = humanizeDate;
   },
   methods: {},
 };
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.column {
+  &.active {
+    background-color: #ff0;
+  }
+}
+</style>

@@ -1,63 +1,89 @@
 <template>
-  <div class="hello">
+  <div class="users">
     <header>Oboz forever</header>
     <UsersTable
       :items="usersOutput"
       :sorting="sortingParams"
       @sort="(id) => (sortingField = id)"
     />
-    <div class="pagination">
-      <span
-        class="pagination__item"
-        v-for="(n, i) in totalPages"
-        :key="i"
-        @click="page = n"
-      >
-        {{ n }} &nbsp;
-      </span>
-    </div>
+    <!--  -->
+    <SearchBar />
+    <!--  -->
+    <Pagination
+      v-model="page"
+      :items="sortedUsers?.length"
+      :page-size="pageSize"
+    />
+    <button @click="users = generateNewUsers()">Generate new users</button>
     <footer>No doubt</footer>
   </div>
 </template>
 
 <script>
 import UsersTable from './UsersTable';
+import Pagination from './Pagination';
+import SearchBar from './SearchBar';
 import { getUsers } from '../scripts/utils/faker';
 import {
   countPaginationParams,
   sortByField,
 } from '../scripts/utils/applicative';
-import { pageSize } from '../scripts/constants/business/table';
+import history from '../scripts/utils/history';
+import { tableFields } from '../scripts/constants/business/table';
 
 export default {
   name: 'Users',
   components: {
     UsersTable,
+    Pagination,
+    SearchBar,
   },
   data() {
+    const { page, pageSize, sortingField } = this.getQueryParams();
+    const users = this.getUsers();
+
+    this.pageSize = pageSize;
+
     const result = {
-      page: 1,
-      sortingField: null,
+      users,
+      /*  */
+      page,
+      sortingField,
       sortingDirection: false,
     };
 
     return result;
   },
+  watch: {
+    page(val) {
+      history.update('page', val);
+    },
+  },
   computed: {
     sortingParams() {
       const { sortingField, sortingDirection } = this;
-      const result = { sortingField, sortingDirection };
+      const result = { field: sortingField, direction: sortingDirection };
 
       return result;
     },
     totalPages() {
-      const { filteredUsers } = this;
-      const result = Math.ceil(filteredUsers?.length / pageSize);
+      const { sortedUsers, pageSize } = this;
+      const result = Math.ceil(sortedUsers?.length / pageSize);
 
       return result;
     },
-    /* filtering */
+    /* 1 filtering */
     filteredUsers() {
+      const { users } = this;
+
+      const filter = () => true;
+
+      const result = users.filter(filter);
+
+      return result;
+    },
+    /* 2 sorting */
+    sortedUsers() {
       const { users, sortingField } = this;
       const result = [...users];
 
@@ -68,29 +94,83 @@ export default {
 
       return result;
     },
-    /* pagination */
+    /* 3 pagination */
     usersOutput() {
-      const { filteredUsers, page } = this;
-      const { start, end } = countPaginationParams(page, pageSize);
-      const result = filteredUsers.slice(start, end);
-      console.log('page, start, end', page, start, end);
+      const { sortedUsers, page, pageSize } = this;
+      const { start, end } = countPaginationParams(
+        page,
+        pageSize,
+        sortedUsers.length
+      );
+      const result = sortedUsers.slice(start, end);
 
       return result;
     },
   },
   beforeCreate() {
-    this.usersCount = 300;
+    /* plwase pre-set users number */
+    this.usersCount = 100;
   },
   created() {
-    const users = getUsers(this.usersCount);
+    const queryParams = history.getAllParams();
 
-    this.users = users;
+    this.queryParams = queryParams;
   },
-  methods: {},
+  methods: {
+    getUsers() {
+      const { usersCount } = this;
+      const storedUsersString = localStorage.getItem('_oboz-table-users');
+      let users = [];
+
+      /*  */
+      try {
+        const storedUsers = JSON.parse(storedUsersString);
+
+        if (storedUsers?.length === usersCount) users = storedUsers;
+      } catch (e) {
+        console.error(e);
+        localStorage.removeItem('_oboz-table-users');
+      }
+
+      /* ER */
+      if (users?.length) return users;
+
+      users = this.generateNewUsers();
+
+      return users;
+    },
+    generateNewUsers() {
+      const { usersCount } = this;
+      const result = getUsers(usersCount);
+
+      localStorage.setItem('_oboz-table-users', JSON.stringify(result));
+
+      return result;
+    },
+    getQueryParams() {
+      const queryParams = history.getAllParams();
+      const {
+        page: queryPage,
+        sort,
+        perPage /* selection, filter */,
+      } = queryParams;
+      const page = +queryPage > 0 ? +queryPage : 1;
+      const pageSize = +perPage > 0 ? +perPage : 10;
+      const sortingField =
+        tableFields.find(({ id }) => id === sort)?.id || null;
+
+      const result = { page, pageSize, sortingField };
+
+      // console.log('input', queryParams);
+      // console.log('output', result);
+
+      return result;
+    },
+  },
 };
 </script>
 
-<style scoped></style>
+<style scoped lang="scss"></style>
 
 /* tableParams=sort:-fullName page:1 perPage=5 selection=id1,id2
 filter=fullName:Vladis birthDate:12.12.2012 */
