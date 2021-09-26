@@ -4,6 +4,7 @@
 
     <!-- table -->
     <UsersTable
+      v-model="selectedItems"
       :items="usersOutput"
       :sorting="sortingParams"
       @sort="(id) => (sortingField = id)"
@@ -19,14 +20,14 @@
       :page-size="perPage"
     />
 
+    <footer>No doubt</footer>
+
     <!-- optional -->
     <div class="devtools">
       <div class="devtools__title">Dev Tools</div>
 
       <button @click="users = generateNewUsers()">Generate new users</button>
     </div>
-
-    <footer>No doubt</footer>
   </div>
 </template>
 
@@ -52,17 +53,20 @@ export default {
     SearchBar,
   },
   data() {
-    const { page, perPage, sortingField, filter } = this.getQueryParams();
+    const { page, perPage, sortingField, filter, selectedItems } =
+      this.getQueryParams();
     const users = this.getUsers();
 
     const result = {
       users,
-      /*  */
+      /* tableParams */
       page,
       perPage,
-      /*  */
+      selectedItems,
+      /* sort */
       sortingField,
       sortingDirection: false,
+      /* filter */
       filter,
     };
 
@@ -136,10 +140,13 @@ export default {
     },
     /* query */
     tableParams() {
-      const { page, perPage } = this;
+      const { page, perPage, sortingField, selectedItems } = this;
+      const selection = selectedItems.map((id) => `id${id}`);
       const result = {
         page,
         perPage,
+        sort: sortingField,
+        selection,
       };
 
       return result;
@@ -191,16 +198,12 @@ export default {
     getQueryParams() {
       /* real query params */
       const queryParams = history.getAllParams();
-      const {
-        tableParams,
-        filter,
-        /* selection,  */
-      } = queryParams;
+      const { tableParams, filter } = queryParams;
 
       /* certain params from combined string */
       const filterSetup = decodeCombinedQueryParameterString(filter);
       const tableSetup = decodeCombinedQueryParameterString(tableParams);
-      const { page: queryPage, sort, perPage } = tableSetup || {};
+      const { page: queryPage, sort, perPage, selection } = tableSetup || {};
 
       /* data interpretation */
       const page = +queryPage > 0 ? +queryPage : 1;
@@ -208,12 +211,16 @@ export default {
       const sortingField =
         tableFields.find(({ id }) => id === sort)?.id || null;
 
+      const selected = selection?.split(',');
+      const selectedItems = (selected || []).map((str) => str.substring(2));
+
       /* output */
       const result = {
         page,
         perPage: pageSize,
         sortingField,
         filter: filterSetup,
+        selectedItems,
       };
 
       return result;
@@ -222,7 +229,6 @@ export default {
       const setup = this.getQueryParams();
 
       Object.entries(setup).forEach(([key, val]) => {
-        console.log('key, val', key, val);
         this[key] = val;
       });
     },
@@ -239,4 +245,14 @@ export default {
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.users {
+  display: grid;
+}
+
+.devtools {
+  opacity: 0.3;
+  position: fixed;
+  bottom: 0;
+}
+</style>

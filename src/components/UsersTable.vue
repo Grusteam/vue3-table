@@ -27,7 +27,15 @@
       </thead>
       <tbody>
         <!-- row (user) -->
-        <tr v-for="user in items" :key="user.id">
+        <tr
+          v-for="user in items"
+          :class="{
+            row: true,
+            active: modelValue?.includes(user.id),
+          }"
+          :key="user.id"
+          @click="atRowClick(user.id)"
+        >
           <!-- value -->
           <td v-for="{ id } in tableFields" :key="id">
             {{ id === 'birthDate' ? humanizeDate(user[id]) : user[id] }}
@@ -40,7 +48,7 @@
 
 <script>
 import { tableFields } from '../scripts/constants/business/table';
-import { humanizeDate } from '../scripts/utils/applicative';
+import { humanizeDate, toggleInArray } from '../scripts/utils/applicative';
 
 export default {
   name: 'UsersTable',
@@ -53,6 +61,10 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    modelValue: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     const result = {};
@@ -64,7 +76,14 @@ export default {
     this.tableFields = tableFields;
     this.humanizeDate = humanizeDate;
   },
-  methods: {},
+  methods: {
+    atRowClick(id) {
+      const { modelValue } = this;
+      const result = toggleInArray(modelValue, id);
+
+      this.$emit('update:modelValue', result);
+    },
+  },
 };
 </script>
 
@@ -72,6 +91,11 @@ export default {
 .column {
   &.active {
     background-color: #ff0;
+  }
+}
+.row {
+  &.active {
+    background-color: #0f0;
   }
 }
 </style>
