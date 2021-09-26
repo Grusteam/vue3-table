@@ -4,7 +4,12 @@
       <div class="title">
         {{ name }}
       </div>
-      <input class="input" type="text" />
+      <input
+        class="input"
+        type="text"
+        :value="modelValue[id]"
+        @input="atInput(id, $event.target.value)"
+      />
     </div>
   </div>
 </template>
@@ -15,9 +20,9 @@ import { searchFields } from '../scripts/constants/business/table';
 export default {
   name: 'SearchBar',
   props: {
-    x: {
-      type: Number,
-      default: 1,
+    modelValue: {
+      type: Object,
+      default: () => ({}),
     },
   },
   data() {
@@ -30,7 +35,19 @@ export default {
   created() {
     this.searchFields = searchFields;
   },
-  methods: {},
+  methods: {
+    atInput(key, value) {
+      const { modelValue } = this;
+      const result = {
+        ...modelValue,
+        [key]: value,
+      };
+
+      this.$emit('update:modelValue', result);
+
+      return result;
+    },
+  },
 };
 </script>
 
