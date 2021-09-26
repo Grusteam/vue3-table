@@ -57,8 +57,6 @@ export default {
   data() {
     const { modelValue } = this;
 
-    console.log('modelValue', modelValue);
-
     const result = {
       localValue: modelValue,
     };

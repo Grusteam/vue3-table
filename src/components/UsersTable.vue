@@ -17,9 +17,9 @@
             :class="{
               column: true,
               active: sorting?.field === id,
-              asc: sorting?.direction,
+              reverse: sorting?.reversed,
             }"
-            @click="$emit('sort', id)"
+            @click="atSortClick(id)"
           >
             {{ name }}
           </th>
@@ -83,17 +83,21 @@ export default {
 
       this.$emit('update:modelValue', result);
     },
+    atSortClick(id) {
+      const { sorting } = this;
+      const changeDirection = sorting?.field === id;
+      const payload = {
+        id,
+        changeDirection,
+      };
+
+      this.$emit('sort', payload);
+    },
   },
 };
 </script>
 
 <style scoped lang="scss">
-.column {
-  &.active {
-    background-color: #ff0;
-  }
-}
-
 .table {
   th,
   tr {
@@ -102,6 +106,20 @@ export default {
 
   .column {
     cursor: pointer;
+
+    /* ↑↓ */
+
+    &.active {
+      &::after {
+        content: ' ↓';
+      }
+
+      &.reverse {
+        &::after {
+          content: ' ↑';
+        }
+      }
+    }
   }
   .row {
     cursor: pointer;

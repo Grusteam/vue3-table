@@ -1,28 +1,31 @@
 import { filterProperties, tableFields } from '../constants/business/table';
 import history from './history';
 
-const sortByName = (a, b) => {
+const sortByName = (a, b, reverse) => {
   const result = a?.fullName > b?.fullName ? 1 : -1;
+  if (reverse) return -result;
 
   return result;
 };
-const sortByDate = (a, b) => {
+const sortByDate = (a, b, reverse) => {
   const aDate = new Date(a?.birthDate);
   const bDate = new Date(b?.birthDate);
   const aTimestamp = aDate.getTime();
   const bTimestamp = bDate.getTime();
   const result = aTimestamp > bTimestamp ? 1 : -1;
 
+  if (reverse) return -result;
+
   return result;
 };
 
-const sortByField = (a, b, id) => {
+const sortByField = (a, b, id, reverse) => {
   const translator = {
     fullName: sortByName,
     birthDate: sortByDate,
   };
 
-  return translator[id]?.(a, b);
+  return translator[id]?.(a, b, reverse);
 };
 
 const countPaginationParams = (target, size, total) => {
@@ -65,7 +68,7 @@ const humanizeDate = (str) => {
 const decodeCombinedQueryParameterString = (str) => {
   const { keyValSeparator } = filterProperties;
   const reg = new RegExp(
-    `(?<key>[A-Za-z]*)${keyValSeparator}(?<val>[A-Za-z0-9,]*)`,
+    `(?<key>[A-Za-z]*)${keyValSeparator}(?<val>[A-Za-z0-9,-]*)`,
     'igs'
   );
   const result = {};
@@ -81,14 +84,14 @@ const decodeCombinedQueryParameterString = (str) => {
   return result;
 };
 
-const encodeCombinedQueryParameterString = (filter) => {
-  const { keyValSeparator } = filterProperties;
+const encodeCombinedQueryParameterString = (params) => {
+  const { keyValSeparator, pairsSeparator } = filterProperties;
   let result = '';
-  const arr = Object.entries(filter);
+  const arr = Object.entries(params);
 
   arr.forEach(([key, val], i) => {
     const last = i + 1 === arr?.length;
-    result += `${key}${keyValSeparator}${val}${last ? '' : '|'}`;
+    result += `${key}${keyValSeparator}${val}${last ? '' : pairsSeparator}`;
   });
 
   return result;
@@ -126,8 +129,6 @@ const getQueryParams = () => {
   const { tableParams, filter } = queryParams;
 
   /* certain params from combined string */
-  console.log('tableParams', tableParams);
-  console.log('filter', filter);
   const filterSetup = decodeCombinedQueryParameterString(filter);
   const tableSetup = decodeCombinedQueryParameterString(tableParams);
   const { page: queryPage, sort, perPage, selection } = tableSetup || {};
@@ -135,7 +136,13 @@ const getQueryParams = () => {
   /* data interpretation */
   const page = +queryPage > 0 ? +queryPage : 1;
   const pageSize = +perPage > 0 ? +perPage : 10;
-  const sortingField = tableFields.find(({ id }) => id === sort)?.id || null;
+
+  /*  */
+  const minusReg = /[-]/;
+  const sortingReversed = minusReg.test(sort);
+  const sortPure = sort?.replace(minusReg, '');
+  const sortingField =
+    tableFields.find(({ id }) => id === sortPure)?.id || null;
 
   const selected = selection?.split(',');
   const selectedItems = (selected || []).map((str) => str.substring(2));
@@ -145,6 +152,7 @@ const getQueryParams = () => {
     page,
     perPage: pageSize,
     sortingField,
+    sortingReversed,
     filter: filterSetup,
     selectedItems,
   };

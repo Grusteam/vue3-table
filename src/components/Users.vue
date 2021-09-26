@@ -7,7 +7,7 @@
       v-model="selectedItems"
       :items="usersOutput"
       :sorting="sortingParams"
-      @sort="(id) => (sortingField = id)"
+      @sort="atSort"
     />
 
     <!-- search panel with text inputs and actions -->
@@ -53,11 +53,15 @@ export default {
     SearchBar,
   },
   data() {
-    const { page, perPage, sortingField, filter, selectedItems } =
-      getQueryParams();
+    const {
+      page,
+      perPage,
+      sortingField,
+      sortingReversed,
+      filter,
+      selectedItems,
+    } = getQueryParams();
     const users = this.getUsers();
-
-    console.log('filter', filter);
 
     const result = {
       users,
@@ -66,6 +70,7 @@ export default {
       perPage,
       selectedItems,
       sortingField,
+      sortingReversed,
       /* filter */
       filter,
     };
@@ -73,7 +78,7 @@ export default {
     return result;
   },
   watch: {
-    tableParams(value) {
+    tableParamsOutput(value) {
       this.setcombinedQueryParam('tableParams', value);
     },
     filter(value) {
@@ -94,9 +99,9 @@ export default {
     },
     /* 2 sorting */
     sortedUsers() {
-      const { filteredUsers, sortingField } = this;
+      const { filteredUsers, sortingField, sortingReversed } = this;
       const result = [...filteredUsers];
-      const sort = (a, b) => sortByField(a, b, sortingField);
+      const sort = (a, b) => sortByField(a, b, sortingField, sortingReversed);
 
       /* sort */
       if (sortingField) result.sort(sort);
@@ -116,13 +121,15 @@ export default {
       return result;
     },
     /* query */
-    tableParams() {
-      const { page, perPage, sortingField, selectedItems } = this;
+    tableParamsOutput() {
+      const { page, perPage, sortingField, selectedItems, sortingReversed } =
+        this;
       const selection = selectedItems.map((id) => `id${id}`);
+      const sort = `${sortingReversed ? '-' : ''}${sortingField}`;
       const result = {
         page,
         perPage,
-        sort: sortingField,
+        sort,
         selection,
       };
 
@@ -130,8 +137,8 @@ export default {
     },
     /*  */
     sortingParams() {
-      const { sortingField } = this;
-      const result = { field: sortingField };
+      const { sortingField, sortingReversed } = this;
+      const result = { field: sortingField, reversed: sortingReversed };
 
       return result;
     },
@@ -194,6 +201,13 @@ export default {
       const newQueryParam = encodeCombinedQueryParameterString(params);
 
       history.update(name, newQueryParam);
+    },
+    atSort({ id, changeDirection }) {
+      const { sortingReversed } = this;
+
+      this.sortingField = id;
+      /* reverse */
+      if (changeDirection) this.sortingReversed = !sortingReversed;
     },
   },
 };
